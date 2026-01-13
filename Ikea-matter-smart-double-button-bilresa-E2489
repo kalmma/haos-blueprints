@@ -1,1 +1,151 @@
 
+blueprint:
+  name: IKEA MATTER SMART DOUBLE BUTTON BILRESA E2489
+  description: Automation to link optional actions to press types of two IKEA BILRESA E2489 buttons (Matter devices only)
+  domain: automation
+  input:
+    # Main Matter device
+    target_device:
+      name: BILRESA Button Device
+      description: >
+        Select the IKEA BILRESA E2489 matter device.
+        This will be used as the source for Button 1 and Button 2.
+      selector:
+        device:
+          filter:
+            - manufacturer: IKEA of Sweden
+          multiple: false
+
+    # Buttons (Matter only)
+    button_1:
+      name: Button 1
+      description: >
+        Select a button entity from the previously selected BILRESA device.
+      selector:
+        entity:
+          domain: event
+          integration: matter
+
+    button_2:
+      name: Button 2
+      description: >
+        Select a button entity from the previously selected BILRESA device.
+      selector:
+        entity:
+          domain: event
+          integration: matter
+
+    # Actions Button 1
+    button_1_multi_press_1:
+      name: Button 1 - Multi Press 1
+      description: Optional actions for Button 1, multi press 1
+      default: []
+      selector:
+        action: {}
+    button_1_multi_press_2:
+      name: Button 1 - Multi Press 2
+      description: Optional actions for Button 1, multi press 2
+      default: []
+      selector:
+        action: {}
+    button_1_long_press:
+      name: Button 1 - Long Press
+      description: Optional actions for Button 1, long press
+      default: []
+      selector:
+        action: {}
+    button_1_long_release:
+      name: Button 1 - Long Release
+      description: Optional actions for Button 1, long release
+      default: []
+      selector:
+        action: {}
+
+    # Actions Button 2
+    button_2_multi_press_1:
+      name: Button 2 - Multi Press 1
+      description: Optional actions for Button 2, multi press 1
+      default: []
+      selector:
+        action: {}
+    button_2_multi_press_2:
+      name: Button 2 - Multi Press 2
+      description: Optional actions for Button 2, multi press 2
+      default: []
+      selector:
+        action: {}
+    button_2_long_press:
+      name: Button 2 - Long Press
+      description: Optional actions for Button 2, long press
+      default: []
+      selector:
+        action: {}
+    button_2_long_release:
+      name: Button 2 - Long Release
+      description: Optional actions for Button 2, long release
+      default: []
+      selector:
+        action: {}
+
+trigger:
+  - platform: state
+    entity_id: !input button_1
+    id: button1
+  - platform: state
+    entity_id: !input button_2
+    id: button2
+
+variables:
+  trigger_id: "{{ trigger.id }}"
+  press_type: "{{ trigger.to_state.attributes.event_type }}"
+
+action:
+  - choose:
+      # Button 1
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger_id == 'button1' and press_type == 'multi_press_1' }}"
+        sequence: !input button_1_multi_press_1
+
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger_id == 'button1' and press_type == 'multi_press_2' }}"
+        sequence: !input button_1_multi_press_2
+
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger_id == 'button1' and press_type == 'long_press' }}"
+        sequence: !input button_1_long_press
+
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger_id == 'button1' and press_type == 'long_release' }}"
+        sequence: !input button_1_long_release
+
+      # Button 2
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger_id == 'button2' and press_type == 'multi_press_1' }}"
+        sequence: !input button_2_multi_press_1
+
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger_id == 'button2' and press_type == 'multi_press_2' }}"
+        sequence: !input button_2_multi_press_2
+
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger_id == 'button2' and press_type == 'long_press' }}"
+        sequence: !input button_2_long_press
+
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger_id == 'button2' and press_type == 'long_release' }}"
+        sequence: !input button_2_long_release
+
+  - service: logbook.log
+    data:
+      name: BILRESA Event
+      message: "Button: {{ trigger_id }}, type: {{ press_type }}"
+
+mode: restart
