@@ -1,5 +1,5 @@
 blueprint:
-  name: IKEA BILRESA E2489 MATTER 2 Buttons
+  name: IKEA MATTER SMART DOUBLE BUTTON BILRESA E2489
   description: Automation to link optional actions to press types of two IKEA BILRESA E2489 buttons (Matter devices only)
   domain: automation
   input:
