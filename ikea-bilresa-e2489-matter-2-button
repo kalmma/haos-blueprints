@@ -1,5 +1,5 @@
 # ===================================================================
-# IKEA BILRESA E2489 Dual Button (Optional Actions)
+# IKEA BILRESA E2489 MATTER 2 Buttons
 # Blueprint Template v1.1.2
 #
 # Internal Versioning:
@@ -20,15 +20,14 @@
 # ===================================================================
 
 blueprint:
-  name: IKEA BILRESA E2489 Dual Button (Optional Actions)
+  name: IKEA BILRESA E2489 MATTER 2 Buttons
   author: kalmma
   description: >
-    Flexible automation blueprint for the IKEA BILRESA E2489 Matter
-    dual-button remote. Allows optional UI-configurable actions for
+    Flexible automation blueprint for the IKEA BILRESA E2489 MATTER 2 Buttons remote. Allows optional UI-configurable actions for
     each button and press type. Empty actions are allowed and safely
     ignored.
   domain: automation
-  source_url: https://github.com/censay/haos-blueprints
+  source_url: https://github.com/kalmma/haos-blueprints
   homeassistant:
     min_version: 2025.12.1
 
