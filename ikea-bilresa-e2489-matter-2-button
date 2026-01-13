@@ -1,228 +1,150 @@
-# ===================================================================
-# IKEA BILRESA E2489 MATTER 2 Buttons
-# Blueprint Template v1.1.2
-#
-# Internal Versioning:
-#   schema_version: 1.1.2
-#   last_updated: 2026-01-13
-#
-# Changelog:
-#   v1.1.2:
-#     - Fixed invalid entity selector filters (removed manufacturer)
-#   v1.1.1:
-#     - Added Matter device selector as primary input (reference only)
-#
-# Power-User Notes:
-#   - This device exposes two event entities, one per physical button.
-#   - Event entities update their state using timestamps.
-#   - Press type is read from attributes.event_type.
-#   - Home Assistant does NOT support dependent selectors in blueprints.
-# ===================================================================
-
 blueprint:
   name: IKEA BILRESA E2489 MATTER 2 Buttons
-  author: kalmma
-  description: >
-    Flexible automation blueprint for the IKEA BILRESA E2489 MATTER 2 Buttons remote. Allows optional UI-configurable actions for
-    each button and press type. Empty actions are allowed and safely
-    ignored.
+  description: Automation to link optional actions to press types of two IKEA BILRESA E2489 buttons (Matter devices only)
   domain: automation
-  source_url: https://github.com/kalmma/haos-blueprints
-  homeassistant:
-    min_version: 2025.12.1
-
   input:
-    # ---------------------------------------------------------------
-    # TARGET DEVICE (REFERENCE ONLY)
-    # ---------------------------------------------------------------
-
+    # Main Matter device
     target_device:
       name: BILRESA Button Device
       description: >
-        Select the IKEA BILRESA E2489 Matter device.
-        This selection is informational only.
-        Home Assistant does not currently support filtering
-        entity selectors based on a selected device.
+        Select the IKEA BILRESA E2489 matter device.
+        This will be used as the source for Button 1 and Button 2.
       selector:
         device:
           filter:
             - manufacturer: IKEA of Sweden
-              integration: matter
+          multiple: false
 
-    # ---------------------------------------------------------------
-    # BUTTON EVENT ENTITIES
-    # ---------------------------------------------------------------
-
-    button1_event:
-      name: Button 1 – Event Entity
+    # Buttons (Matter only)
+    button_1:
+      name: Button 1
       description: >
-        Select the event entity for Button 1 belonging to the
-        selected BILRESA device.
+        Select a button entity from the previously selected BILRESA device.
       selector:
         entity:
           domain: event
-          filter:
-            - integration: matter
+          integration: matter
 
-    button2_event:
-      name: Button 2 – Event Entity
+    button_2:
+      name: Button 2
       description: >
-        Select the event entity for Button 2 belonging to the
-        selected BILRESA device.
+        Select a button entity from the previously selected BILRESA device.
       selector:
         entity:
           domain: event
-          filter:
-            - integration: matter
+          integration: matter
 
-    # ---------------------------------------------------------------
-    # BUTTON 1 ACTIONS
-    # ---------------------------------------------------------------
-
-    button1_single:
-      name: Button 1 – Single Press
-      description: Action for Button 1 single press (multi_press_1).
+    # Actions Button 1
+    button_1_multi_press_1:
+      name: Button 1 - Multi Press 1
+      description: Optional actions for Button 1, multi press 1
+      default: []
+      selector:
+        action: {}
+    button_1_multi_press_2:
+      name: Button 1 - Multi Press 2
+      description: Optional actions for Button 1, multi press 2
+      default: []
+      selector:
+        action: {}
+    button_1_long_press:
+      name: Button 1 - Long Press
+      description: Optional actions for Button 1, long press
+      default: []
+      selector:
+        action: {}
+    button_1_long_release:
+      name: Button 1 - Long Release
+      description: Optional actions for Button 1, long release
       default: []
       selector:
         action: {}
 
-    button1_double:
-      name: Button 1 – Double Press
-      description: Action for Button 1 double press (multi_press_2).
+    # Actions Button 2
+    button_2_multi_press_1:
+      name: Button 2 - Multi Press 1
+      description: Optional actions for Button 2, multi press 1
       default: []
       selector:
         action: {}
-
-    button1_long_press:
-      name: Button 1 – Long Press (hold)
-      description: Action for Button 1 long press start (long_press).
+    button_2_multi_press_2:
+      name: Button 2 - Multi Press 2
+      description: Optional actions for Button 2, multi press 2
       default: []
       selector:
         action: {}
-
-    button1_long_release:
-      name: Button 1 – Long Press Release
-      description: Action for Button 1 long press completion (long_release).
+    button_2_long_press:
+      name: Button 2 - Long Press
+      description: Optional actions for Button 2, long press
       default: []
       selector:
         action: {}
-
-    # ---------------------------------------------------------------
-    # BUTTON 2 ACTIONS
-    # ---------------------------------------------------------------
-
-    button2_single:
-      name: Button 2 – Single Press
-      description: Action for Button 2 single press (multi_press_1).
+    button_2_long_release:
+      name: Button 2 - Long Release
+      description: Optional actions for Button 2, long release
       default: []
       selector:
         action: {}
-
-    button2_double:
-      name: Button 2 – Double Press
-      description: Action for Button 2 double press (multi_press_2).
-      default: []
-      selector:
-        action: {}
-
-    button2_long_press:
-      name: Button 2 – Long Press (hold)
-      description: Action for Button 2 long press start (long_press).
-      default: []
-      selector:
-        action: {}
-
-    button2_long_release:
-      name: Button 2 – Long Press Release
-      description: Action for Button 2 long press completion (long_release).
-      default: []
-      selector:
-        action: {}
-
-# ===================================================================
-# AUTOMATION LOGIC
-# ===================================================================
-
-variables:
-  button1_entity: !input button1_event
-  button2_entity: !input button2_event
 
 trigger:
   - platform: state
+    entity_id: !input button_1
     id: button1
-    entity_id: !input button1_event
-    not_from: 'unavailable'
-    not_to: 'unavailable'
-
   - platform: state
+    entity_id: !input button_2
     id: button2
-    entity_id: !input button2_event
-    not_from: 'unavailable'
-    not_to: 'unavailable'
 
-condition: []
+variables:
+  trigger_id: "{{ trigger.id }}"
+  press_type: "{{ trigger.to_state.attributes.event_type }}"
 
 action:
-  - variables:
-      trigger_id: "{{ trigger.id }}"
-      press_type: "{{ trigger.to_state.attributes.event_type }}"
-
   - choose:
-
-      # -------------------------------------------------------------
-      # BUTTON 1
-      # -------------------------------------------------------------
+      # Button 1
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger_id == 'button1' and press_type == 'multi_press_1' }}"
+        sequence: !input button_1_multi_press_1
 
       - conditions:
           - condition: template
-            value_template: >
-              {{ trigger_id == 'button1' and press_type == 'multi_press_1' }}
-        sequence: !input button1_single
+            value_template: "{{ trigger_id == 'button1' and press_type == 'multi_press_2' }}"
+        sequence: !input button_1_multi_press_2
 
       - conditions:
           - condition: template
-            value_template: >
-              {{ trigger_id == 'button1' and press_type == 'multi_press_2' }}
-        sequence: !input button1_double
+            value_template: "{{ trigger_id == 'button1' and press_type == 'long_press' }}"
+        sequence: !input button_1_long_press
 
       - conditions:
           - condition: template
-            value_template: >
-              {{ trigger_id == 'button1' and press_type == 'long_press' }}
-        sequence: !input button1_long_press
+            value_template: "{{ trigger_id == 'button1' and press_type == 'long_release' }}"
+        sequence: !input button_1_long_release
+
+      # Button 2
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger_id == 'button2' and press_type == 'multi_press_1' }}"
+        sequence: !input button_2_multi_press_1
 
       - conditions:
           - condition: template
-            value_template: >
-              {{ trigger_id == 'button1' and press_type == 'long_release' }}
-        sequence: !input button1_long_release
-
-      # -------------------------------------------------------------
-      # BUTTON 2
-      # -------------------------------------------------------------
+            value_template: "{{ trigger_id == 'button2' and press_type == 'multi_press_2' }}"
+        sequence: !input button_2_multi_press_2
 
       - conditions:
           - condition: template
-            value_template: >
-              {{ trigger_id == 'button2' and press_type == 'multi_press_1' }}
-        sequence: !input button2_single
+            value_template: "{{ trigger_id == 'button2' and press_type == 'long_press' }}"
+        sequence: !input button_2_long_press
 
       - conditions:
           - condition: template
-            value_template: >
-              {{ trigger_id == 'button2' and press_type == 'multi_press_2' }}
-        sequence: !input button2_double
+            value_template: "{{ trigger_id == 'button2' and press_type == 'long_release' }}"
+        sequence: !input button_2_long_release
 
-      - conditions:
-          - condition: template
-            value_template: >
-              {{ trigger_id == 'button2' and press_type == 'long_press' }}
-        sequence: !input button2_long_press
-
-      - conditions:
-          - condition: template
-            value_template: >
-              {{ trigger_id == 'button2' and press_type == 'long_release' }}
-        sequence: !input button2_long_release
+  - service: logbook.log
+    data:
+      name: BILRESA Event
+      message: "Button: {{ trigger_id }}, type: {{ press_type }}"
 
 mode: restart
