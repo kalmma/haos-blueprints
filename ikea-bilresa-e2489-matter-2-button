@@ -1,36 +1,34 @@
 # ===================================================================
 # IKEA BILRESA E2489 Dual Button (Optional Actions)
-# Blueprint Template v1.1.1
+# Blueprint Template v1.1.2
 #
 # Internal Versioning:
-#   schema_version: 1.1.1
+#   schema_version: 1.1.2
 #   last_updated: 2026-01-13
 #
 # Changelog:
+#   v1.1.2:
+#     - Fixed invalid entity selector filters (removed manufacturer)
 #   v1.1.1:
 #     - Added Matter device selector as primary input (reference only)
-#     - Limited event entity selectors to IKEA Matter devices
-#   v1.1.0:
-#     - Optional UI-configurable actions per button & press type
-#     - Supports empty actions (no-op)
 #
 # Power-User Notes:
 #   - This device exposes two event entities, one per physical button.
 #   - Event entities update their state using timestamps.
 #   - Press type is read from attributes.event_type.
-#   - Home Assistant does NOT support dependent selectors in blueprints;
-#     the selected device is informational only.
+#   - Home Assistant does NOT support dependent selectors in blueprints.
 # ===================================================================
 
 blueprint:
-  name: ikea-bilresa-e2489-matter-2-button
+  name: IKEA BILRESA E2489 Dual Button (Optional Actions)
   author: kalmma
   description: >
-    Flexible automation blueprint for the ikea-bilresa-e2489-matter-2-button remote. Allows optional UI-configurable actions for
+    Flexible automation blueprint for the IKEA BILRESA E2489 Matter
+    dual-button remote. Allows optional UI-configurable actions for
     each button and press type. Empty actions are allowed and safely
     ignored.
   domain: automation
-  source_url: https://github.com/kalmma/haos-blueprints
+  source_url: https://github.com/censay/haos-blueprints
   homeassistant:
     min_version: 2025.12.1
 
@@ -66,7 +64,6 @@ blueprint:
           domain: event
           filter:
             - integration: matter
-              manufacturer: IKEA of Sweden
 
     button2_event:
       name: Button 2 – Event Entity
@@ -78,7 +75,6 @@ blueprint:
           domain: event
           filter:
             - integration: matter
-              manufacturer: IKEA of Sweden
 
     # ---------------------------------------------------------------
     # BUTTON 1 ACTIONS
