@@ -1,26 +1,25 @@
 blueprint:
-  name: Aqara H2 EU Switch – uitgebreid (knop 4 & 5, Matter)
+  name: Aqara H2 EU Switch – uitgebreid (knop 4 & 5, optioneel)
   description: >
-    Uitgebreid blueprint voor de Aqara H2 EU switch via Matter.
+    Uitgebreid blueprint voor Aqara H2 EU switch via Matter.
     Ondersteunt knop 4 en 5 met initial_press events.
+    Knoppen zijn optioneel.
     Optioneel ander gedrag tijdens nachturen.
   domain: automation
 
   input:
     button_4:
-      name: Knop 4 (event)
+      name: Knop 4 (event, optioneel)
       description: Event entiteit van knop 4 (alleen Aqara Matter)
+      default: ""
       selector:
         entity:
           domain: event
           integration: matter
-          # Filter op Aqara (optioneel, via manufacturer)
-          # Het veld manufacturer wordt vaak gebruikt in device_info
-          # Als je device info beschikbaar is, kan dit nauwkeuriger worden
-          # Home Assistant gebruikt soms 'vendor' of 'model' voor Matter devices
 
     button_4_action:
       name: Actie knop 4 (overdag)
+      default: []
       selector:
         action: {}
 
@@ -31,8 +30,9 @@ blueprint:
         action: {}
 
     button_5:
-      name: Knop 5 (event)
+      name: Knop 5 (event, optioneel)
       description: Event entiteit van knop 5 (alleen Aqara Matter)
+      default: ""
       selector:
         entity:
           domain: event
@@ -40,6 +40,7 @@ blueprint:
 
     button_5_action:
       name: Actie knop 5 (overdag)
+      default: []
       selector:
         action: {}
 
@@ -63,17 +64,9 @@ blueprint:
 
 mode: restart
 
-trigger:
-  - platform: state
-    entity_id: !input button_4
-    to: "initial_press"
-    id: knop_4
+trigger: []
 
-  - platform: state
-    entity_id: !input button_5
-    to: "initial_press"
-    id: knop_5
-
+# ───────── Variabelen ─────────
 variables:
   is_night: >
     {% set start = strptime(night_start, '%H:%M:%S').time() %}
@@ -85,12 +78,13 @@ variables:
       {{ now >= start or now < end }}
     {% endif %}
 
+# ───────── Acties ─────────
 action:
   - choose:
       # ───────── Knop 4 ─────────
       - conditions:
-          - condition: trigger
-            id: knop_4
+          - condition: template
+            value_template: "{{ button_4 != '' and trigger.entity_id == button_4 and trigger.to_state.state == 'initial_press' }}"
         sequence:
           - choose:
               - conditions:
@@ -101,8 +95,8 @@ action:
 
       # ───────── Knop 5 ─────────
       - conditions:
-          - condition: trigger
-            id: knop_5
+          - condition: template
+            value_template: "{{ button_5 != '' and trigger.entity_id == button_5 and trigger.to_state.state == 'initial_press' }}"
         sequence:
           - choose:
               - conditions:
@@ -110,4 +104,3 @@ action:
                     value_template: "{{ is_night and button_5_night_action | length > 0 }}"
                 sequence: !input button_5_night_action
             default: !input button_5_action
-
