@@ -1,0 +1,107 @@
+blueprint:
+  name: Aqara H2 EU Switch – uitgebreid (knop 4 & 5)
+  description: >
+    Uitgebreid blueprint voor de Aqara H2 EU switch.
+    Ondersteunt knop 4 en 5 met initial_press events.
+    Optioneel ander gedrag tijdens nachturen.
+  domain: automation
+
+  input:
+    button_4:
+      name: Knop 4 (event)
+      description: Event entiteit van knop 4
+      selector:
+        entity:
+          domain: event
+
+    button_4_action:
+      name: Actie knop 4 (overdag)
+      selector:
+        action: {}
+
+    button_4_night_action:
+      name: Actie knop 4 (nacht, optioneel)
+      description: Wordt gebruikt tijdens nachturen
+      default: []
+      selector:
+        action: {}
+
+    button_5:
+      name: Knop 5 (event)
+      description: Event entiteit van knop 5
+      selector:
+        entity:
+          domain: event
+
+    button_5_action:
+      name: Actie knop 5 (overdag)
+      selector:
+        action: {}
+
+    button_5_night_action:
+      name: Actie knop 5 (nacht, optioneel)
+      default: []
+      selector:
+        action: {}
+
+    night_start:
+      name: Nacht begint om
+      default: "23:00:00"
+      selector:
+        time: {}
+
+    night_end:
+      name: Nacht eindigt om
+      default: "06:00:00"
+      selector:
+        time: {}
+
+mode: restart
+
+trigger:
+  - platform: state
+    entity_id: !input button_4
+    to: "initial_press"
+    id: knop_4
+
+  - platform: state
+    entity_id: !input button_5
+    to: "initial_press"
+    id: knop_5
+
+variables:
+  is_night: >
+    {% set start = strptime(night_start, '%H:%M:%S').time() %}
+    {% set end = strptime(night_end, '%H:%M:%S').time() %}
+    {% set now = now().time() %}
+    {% if start < end %}
+      {{ start <= now < end }}
+    {% else %}
+      {{ now >= start or now < end }}
+    {% endif %}
+
+action:
+  - choose:
+      # ───────── Knop 4 ─────────
+      - conditions:
+          - condition: trigger
+            id: knop_4
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ is_night and button_4_night_action | length > 0 }}"
+                sequence: !input button_4_night_action
+            default: !input button_4_action
+
+      # ───────── Knop 5 ─────────
+      - conditions:
+          - condition: trigger
+            id: knop_5
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ is_night and button_5_night_action | length > 0 }}"
+                sequence: !input button_5_night_action
+            default: !input button_5_action
