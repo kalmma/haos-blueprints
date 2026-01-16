@@ -1,7 +1,7 @@
 blueprint:
-  name: Aqara H2 EU Switch – uitgebreid (knop 4 & 5)
+  name: Aqara H2 EU Switch – uitgebreid (knop 4 & 5, Matter)
   description: >
-    Uitgebreid blueprint voor de Aqara H2 EU switch.
+    Uitgebreid blueprint voor de Aqara H2 EU switch via Matter.
     Ondersteunt knop 4 en 5 met initial_press events.
     Optioneel ander gedrag tijdens nachturen.
   domain: automation
@@ -9,10 +9,15 @@ blueprint:
   input:
     button_4:
       name: Knop 4 (event)
-      description: Event entiteit van knop 4
+      description: Event entiteit van knop 4 (alleen Aqara Matter)
       selector:
         entity:
           domain: event
+          integration: matter
+          # Filter op Aqara (optioneel, via manufacturer)
+          # Het veld manufacturer wordt vaak gebruikt in device_info
+          # Als je device info beschikbaar is, kan dit nauwkeuriger worden
+          # Home Assistant gebruikt soms 'vendor' of 'model' voor Matter devices
 
     button_4_action:
       name: Actie knop 4 (overdag)
@@ -21,17 +26,17 @@ blueprint:
 
     button_4_night_action:
       name: Actie knop 4 (nacht, optioneel)
-      description: Wordt gebruikt tijdens nachturen
       default: []
       selector:
         action: {}
 
     button_5:
       name: Knop 5 (event)
-      description: Event entiteit van knop 5
+      description: Event entiteit van knop 5 (alleen Aqara Matter)
       selector:
         entity:
           domain: event
+          integration: matter
 
     button_5_action:
       name: Actie knop 5 (overdag)
@@ -105,3 +110,4 @@ action:
                     value_template: "{{ is_night and button_5_night_action | length > 0 }}"
                 sequence: !input button_5_night_action
             default: !input button_5_action
+
